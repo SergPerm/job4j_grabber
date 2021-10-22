@@ -3,11 +3,11 @@ package ru.job4j.quartz;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -17,42 +17,48 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 public class AlertRabbit {
 
-    private Connection cn;
-    private int interval;
-    private Properties conf;
-
-    public void init() {
+    private Properties getProperties() {
+        Properties conf = null;
         try (InputStream in = AlertRabbit.class.getClassLoader()
                 .getResourceAsStream("rabbit.properties")) {
             conf = new Properties();
             conf.load(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return conf;
+    }
+
+    private Connection getCn(Properties conf) {
+        Connection cn = null;
+        try {
             Class.forName(conf.getProperty("driver-class-name"));
             cn = DriverManager.getConnection(
                     conf.getProperty("url"),
                     conf.getProperty("username"),
                     conf.getProperty("password")
             );
-            interval = Integer.parseInt(conf.getProperty("rabbit.interval"));
         } catch (Exception e) {
-            throw new IllegalStateException(e);
+            e.printStackTrace();
         }
+        return cn;
     }
 
     public static void main(String[] args) {
         AlertRabbit alertRabbit = new AlertRabbit();
-        alertRabbit.init();
-        try {
+        Properties prop = alertRabbit.getProperties();
+        try (Connection cn = alertRabbit.getCn(prop)) {
             List<Long> store = new ArrayList<>();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDataMap data = new JobDataMap();
             data.put("store", store);
-            data.putIfAbsent("connection", alertRabbit.cn);
+            data.putIfAbsent("connection", cn);
             JobDetail job = newJob(Rabbit.class)
                     .usingJobData(data)
                     .build();
             SimpleScheduleBuilder times = simpleSchedule()
-                    .withIntervalInSeconds(alertRabbit.interval)
+                    .withIntervalInSeconds(Integer.parseInt(prop.getProperty("rabbit.interval")))
                     .repeatForever();
             Trigger trigger = newTrigger()
                     .startNow()
@@ -81,9 +87,7 @@ public class AlertRabbit {
             Connection cn = (Connection) context.getJobDetail().getJobDataMap().get("connection");
             try (PreparedStatement statement =
                          cn.prepareStatement("insert into rabbit (created_date) values (?)")) {
-                SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
-                Date date = new Date();
-                statement.setDate(1, java.sql.Date.valueOf(formater.format(date)));
+                statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
                 statement.execute();
             } catch (Exception e) {
                 e.printStackTrace();
