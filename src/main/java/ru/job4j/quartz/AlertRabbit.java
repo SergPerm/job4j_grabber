@@ -29,19 +29,13 @@ public class AlertRabbit {
         return conf;
     }
 
-    private Connection getCn(Properties conf) {
-        Connection cn = null;
-        try {
-            Class.forName(conf.getProperty("driver-class-name"));
-            cn = DriverManager.getConnection(
-                    conf.getProperty("url"),
-                    conf.getProperty("username"),
-                    conf.getProperty("password")
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return cn;
+    private Connection getCn(Properties conf) throws ClassNotFoundException, SQLException {
+        Class.forName(conf.getProperty("driver-class-name"));
+        return DriverManager.getConnection(
+                conf.getProperty("url"),
+                conf.getProperty("username"),
+                conf.getProperty("password")
+        );
     }
 
     public static void main(String[] args) {
