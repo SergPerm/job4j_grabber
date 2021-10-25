@@ -22,18 +22,11 @@ public class SqlRuDateTimeParser implements DateTimeParser {
             Map.entry("ноя", "NOVEMBER"),
             Map.entry("дек", "DECEMBER"));
 
-    private LocalDate date;
-
-    public SqlRuDateTimeParser() {
-        this.date = LocalDateTime.now().toLocalDate();
-    }
-
-    public SqlRuDateTimeParser(LocalDate date) {
-        this.date = date;
-    }
+    public SqlRuDateTimeParser() { }
 
     @Override
     public LocalDateTime parse(String parse) {
+        LocalDate date = LocalDateTime.now().toLocalDate();
         String[] tmp = parse.split(", ");
         String[] tmpDate = tmp[0].split(" ");
         String[] tmpTime = tmp[1].split(":");
