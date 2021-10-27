@@ -17,6 +17,46 @@ public class Post {
     private String description;
     private LocalDateTime created;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDateTime getCreated() {
+        return created;
+    }
+
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -46,37 +86,5 @@ public class Post {
                 + ", description='" + description + '\''
                 + ", created=" + created
                 + '}';
-    }
-
-    private void getDescriptionFromUrl(String url) throws IOException {
-        int numberOfMsg = 0;
-
-        Document doc = Jsoup.connect(url).get();
-
-        List<TextNode> textMsgDescription = doc.select(".msgTable")
-                .get(numberOfMsg).select(".msgBody")
-                .get(1).textNodes();
-        StringBuilder sb = new StringBuilder();
-        for (TextNode tn : textMsgDescription) {
-            sb.append(tn.getWholeText());
-            sb.append(System.lineSeparator());
-        }
-        description = sb.toString().trim();
-
-        String wholeText = doc.select(".msgTable")
-                .get(numberOfMsg).select(".msgFooter")
-                .get(0).textNodes()
-                .get(0).getWholeText();
-        String data = wholeText.substring(0, wholeText.length() - 5).trim();
-        SqlRuDateTimeParser sqlRuDateTimeParser = new SqlRuDateTimeParser();
-        created = sqlRuDateTimeParser.parse(data);
-    }
-
-    public static void main(String[] args) throws IOException {
-        Post post = new Post();
-        String url = "https://www.sql.ru/forum/"
-                + "1325330/lidy-be-fe-senior-cistemnye-analitiki-qa-i-devops-moskva-do-200t";
-        post.getDescriptionFromUrl(url);
-        System.out.println(post);
     }
 }
