@@ -7,6 +7,7 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import ru.job4j.grabber.Parse;
 import ru.job4j.grabber.Post;
+import ru.job4j.grabber.utils.DateTimeParser;
 import ru.job4j.grabber.utils.SqlRuDateTimeParser;
 
 import java.io.IOException;
@@ -15,6 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SqlRuParse implements Parse {
+
+    private final DateTimeParser dateTimeParser;
+
+    public SqlRuParse(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
+    }
 
     @Override
     public List<Post> list(String link) {
@@ -91,10 +98,9 @@ public class SqlRuParse implements Parse {
         if (wholeText != null) {
             data = wholeText.substring(0, wholeText.length() - 5).trim();
         }
-        SqlRuDateTimeParser sqlRuDateTimeParser = new SqlRuDateTimeParser();
         LocalDateTime created = null;
         if (data != null) {
-            created = sqlRuDateTimeParser.parse(data);
+            created = dateTimeParser.parse(data);
         }
 
         Post postTmp = new Post();
@@ -108,7 +114,8 @@ public class SqlRuParse implements Parse {
 
     public static void main(String[] args) {
         String url = "https://www.sql.ru/forum/job-offers";
-        SqlRuParse sqlRuParse1 = new SqlRuParse();
+        DateTimeParser dtp = new SqlRuDateTimeParser();
+        SqlRuParse sqlRuParse1 = new SqlRuParse(dtp);
         List<Post> posts = sqlRuParse1.list(url);
         for (Post p : posts) {
             System.out.println(p);
