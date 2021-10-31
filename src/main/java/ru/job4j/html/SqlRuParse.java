@@ -74,20 +74,27 @@ public class SqlRuParse implements Parse {
             title = msgTable.selectFirst(".messageHeader").text();
         }
 
-        List<TextNode> textMsgDescription = null;
-        if (msgTable != null) {
-            textMsgDescription = msgTable.select(".msgBody")
-                    .get(1).textNodes();
-        }
-        StringBuilder sb = new StringBuilder();
-        if (textMsgDescription != null) {
-            for (TextNode tn : textMsgDescription) {
-                sb.append(tn.getWholeText());
-                sb.append(System.lineSeparator());
-            }
-        }
-        String description = sb.toString().trim();
+        String description = getDescriptionWithLineSeparator(msgTable);
 
+        LocalDateTime created = getDateTimeCreated(msgTable);
+
+        Post postTmp = new Post();
+        postTmp.setLink(link);
+        postTmp.setTitle(title);
+        postTmp.setDescription(description);
+        postTmp.setCreated(created);
+
+        return postTmp;
+    }
+
+    /**
+     * метод getDateTimeCreated(Element msgTable) извлекает
+     * из Element msgTable время и дату создания поста в текстовом виде и преобразует
+     * в LocalDateTime с помощью dateTimeParser.parse(data)
+     * @param msgTable - элемент для разбора
+     * @return created or null - LocalDateTime created.
+     */
+    private LocalDateTime getDateTimeCreated(Element msgTable) {
         String wholeText = null;
         if (msgTable != null) {
             wholeText = msgTable.select(".msgFooter")
@@ -102,14 +109,30 @@ public class SqlRuParse implements Parse {
         if (data != null) {
             created = dateTimeParser.parse(data);
         }
+        return created;
+    }
 
-        Post postTmp = new Post();
-        postTmp.setLink(link);
-        postTmp.setTitle(title);
-        postTmp.setDescription(description);
-        postTmp.setCreated(created);
-
-        return postTmp;
+    /**
+     * метод getDescriptionWithLineSeparator(Element msgTable) разбирает Element msgTable
+     * на составляющие части, выделяет из них текст и собирает текст в единую строку
+     * с помощью StringBuilder и System.lineSeparator для придания удобочитаемого вида
+     * @param msgTable - элемент для разбора
+     * @return description - строка без пробелов до и после текста.
+     */
+     private String getDescriptionWithLineSeparator(Element msgTable) {
+        List<TextNode> textMsgDescription = null;
+        if (msgTable != null) {
+            textMsgDescription = msgTable.select(".msgBody")
+                    .get(1).textNodes();
+        }
+        StringBuilder sb = new StringBuilder();
+        if (textMsgDescription != null) {
+            for (TextNode tn : textMsgDescription) {
+                sb.append(tn.getWholeText());
+                sb.append(System.lineSeparator());
+            }
+        }
+        return sb.toString().trim();
     }
 
     public static void main(String[] args) {
