@@ -2,7 +2,6 @@ package ru.job4j.grabber;
 
 import ru.job4j.grabber.utils.DateTimeParser;
 import ru.job4j.grabber.utils.SqlRuDateTimeParser;
-import ru.job4j.html.SqlRuParse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -114,7 +113,7 @@ public class PsqlStore implements Store, AutoCloseable {
         PsqlStore psqlStore = new PsqlStore(conf);
         DateTimeParser dtp = new SqlRuDateTimeParser();
         SqlRuParse sqlRuParse1 = new SqlRuParse(dtp);
-        List<Post> posts = sqlRuParse1.list(conf.getProperty("sqlRu"));
+        List<Post> posts = sqlRuParse1.list(conf.getProperty("urlForParse"));
         for (Post p : posts) {
             psqlStore.save(p);
         }

@@ -4,7 +4,6 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import ru.job4j.grabber.utils.DateTimeParser;
 import ru.job4j.grabber.utils.SqlRuDateTimeParser;
-import ru.job4j.html.SqlRuParse;
 
 import java.util.List;
 
