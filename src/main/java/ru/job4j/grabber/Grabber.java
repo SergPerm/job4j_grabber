@@ -65,7 +65,10 @@ public class Grabber implements Grab {
             Properties cfg = (Properties) map.get("property");
             List<Post> list = parse.list(cfg.getProperty("urlForParse"));
             for (Post post : list) {
-                store.save(post);
+                String title = post.getTitle();
+                if (title.toLowerCase().matches(".*(java)[^s].*")) {
+                    store.save(post);
+                }
             }
         }
     }
@@ -77,8 +80,8 @@ public class Grabber implements Grab {
         Store store = grab.store();
         Parse parse = grab.parse();
         grab.init(parse, store, scheduler);
-        Thread.sleep(100000);
+        Thread.sleep(50000);
         scheduler.shutdown();
-        System.out.println(store.findById(10));
+        System.out.println(store.findById(2));
     }
 }
