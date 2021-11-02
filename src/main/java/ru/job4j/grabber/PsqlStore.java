@@ -64,13 +64,7 @@ public class PsqlStore implements Store, AutoCloseable {
         try (PreparedStatement statement = cnn.prepareStatement("select * from post")) {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    Post tmp = new Post();
-                    tmp.setId(resultSet.getInt("id"));
-                    tmp.setTitle(resultSet.getString("title"));
-                    tmp.setDescription(resultSet.getString("description"));
-                    tmp.setLink(resultSet.getString("link"));
-                    tmp.setCreated(resultSet.getTimestamp("created").toLocalDateTime());
-                    posts.add(tmp);
+                    posts.add(this.createPostFromResultSet(resultSet));
                 }
             }
         } catch (Exception e) {
@@ -86,19 +80,23 @@ public class PsqlStore implements Store, AutoCloseable {
             statement.setInt(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    Post tmp = new Post();
-                    tmp.setId(resultSet.getInt("id"));
-                    tmp.setTitle(resultSet.getString("title"));
-                    tmp.setDescription(resultSet.getString("description"));
-                    tmp.setLink(resultSet.getString("link"));
-                    tmp.setCreated(resultSet.getTimestamp("created").toLocalDateTime());
-                    return tmp;
+                    return this.createPostFromResultSet(resultSet);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private Post createPostFromResultSet(ResultSet resultSet) throws SQLException {
+        Post post = new Post();
+        post.setId(resultSet.getInt("id"));
+        post.setTitle(resultSet.getString("title"));
+        post.setDescription(resultSet.getString("description"));
+        post.setLink(resultSet.getString("link"));
+        post.setCreated(resultSet.getTimestamp("created").toLocalDateTime());
+        return post;
     }
 
     public static void main(String[] args) {
